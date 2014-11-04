@@ -4,17 +4,23 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
+import com.example.test_team_manager.R;
 import com.example.test_team_manager.helper.PlayerChipHelper;
 import com.example.test_team_manager.model.PlayerChip;
+import com.example.test_team_manager.model.TeamFormation;
 import com.example.test_team_manager.utils.BDLog;
 import com.example.test_team_manager.view.rules.PlayerChipInterface;
 
@@ -37,51 +43,44 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 
 	private int backGroundColor = Color.rgb(33, 155, 33);
 	private Paint paintPlayerChipCircle = new Paint();
+	private Paint paintPlayerChipCircleSelect = new Paint();
 	private Paint paintPlayerChipText = new Paint();
+	private Paint paintTouchPoint = new Paint();
 	private PlayerChipHelper playerChipHelper = new PlayerChipHelper();
 	private PlayerChip playerChipGrab;
+	private Bitmap bitmapFootball;
+	private Matrix matrixFootball = new Matrix();
 
-	private GestureDetector gestureDetector;
-	
 	public void init(Context context) {
 		setBackgroundColor(backGroundColor);
-		paintPlayerChipCircle.setColor(Color.rgb(188, 77, 77));
-		paintPlayerChipText.setColor(Color.rgb(33, 22, 22));
+		//
+		BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.soccer_ball_05); 
+		bitmapFootball = Bitmap.createScaledBitmap(drawable.getBitmap(), 50, 50, true);
+		//
+		paintPlayerChipText.setColor(Color.rgb(243, 242, 222));
+		paintPlayerChipText.setTextSize(40);
+		paintPlayerChipText.setStrokeWidth(5f);
+		paintPlayerChipText.setTypeface(Typeface.DEFAULT_BOLD);
+		//
+		paintPlayerChipCircle.setColor(Color.rgb(153, 62, 82));
+		paintPlayerChipCircle.setAntiAlias(true);
+		//
+		paintPlayerChipCircleSelect.setColor(Color.rgb(133, 232, 122));
+		paintPlayerChipCircleSelect.setAntiAlias(true);
+		//
+		paintTouchPoint.setColor(Color.argb(177, 233, 232, 222));
+		paintTouchPoint.setAntiAlias(true);
 
-		gestureDetector = new GestureDetector(context, new GestureListener());
+		setBackgroundDrawables();
 	}
-	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
-		@Override
-		public boolean onSingleTapConfirmed(MotionEvent e)
-		{
-			BDLog.i("onSingleTapConfirmed");
-			return performClick();
-		}
-
-		@Override
-		public void onLongPress(MotionEvent e)
-		{
-			BDLog.i("onLongPress");
-			performLongClick();
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-		{
-			BDLog.i("onFling");
-			return super.onFling(e1, e2, velocityX, velocityY);
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			BDLog.i("onDoubleTap");
-			return true;
-		}
-
-		@Override
-		public boolean onDoubleTapEvent(MotionEvent e) {
-			return false;
+	@SuppressLint("NewApi")
+	@SuppressWarnings("deprecation")
+	private void setBackgroundDrawables() {
+		if (Build.VERSION.SDK_INT >= 16) {
+			setBackground(getResources().getDrawable(R.drawable.bg_stadium_green04));
+		} else {
+			setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_stadium_green04));
 		}
 	}
 
@@ -108,14 +107,39 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 	}
 
 	@Override
+	public void clearPlayerChips() {
+		playerChipHelper.clearPlayerChips();
+		invalidate();
+	}
+	
+	public void setTeamFormation(TeamFormation formation) {
+		playerChipHelper.setTeamFormation(formation);
+		invalidate();
+	}
+
+	@Override
 	protected void onDraw(Canvas canvas) {
 		drawPlayGround(canvas);
 		drawPlayerChips(canvas);
+		drawFootBall(canvas);
+		drawTouchPoint(canvas);
 		super.onDraw(canvas);
 	}
 
+	private void drawFootBall(Canvas canvas) {
+		matrixFootball.reset();
+		matrixFootball.preTranslate(viewWidth/2-25, 55);
+		canvas.drawBitmap(bitmapFootball, matrixFootball, null);
+	}
+	
 	private void drawPlayGround(Canvas canvas) {
 
+	}
+
+	private void drawTouchPoint(Canvas canvas) {
+		if (TouchEvent.DOWN.equals(touchMode) || TouchEvent.MOVE.equals(touchMode)) {
+			canvas.drawCircle(touchX, touchY, 25, paintTouchPoint);
+		}
 	}
 
 	private void drawPlayerChips(Canvas canvas) {
@@ -125,14 +149,13 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 		}
 		// grab chip
 		PlayerChip grabChip = playerChipGrab;
-		if (grabChip != null) {
+		if (grabChip != null && ChipTouchMode.GRAB.equals(chipTouchMode)) {
 			// draw outer circle
 			int radius = (int) grabChip.length / 2;
-			canvas.drawCircle(grabChip.viewPoint.x, grabChip.viewPoint.y, radius, paintPlayerChipCircle);
+			canvas.drawCircle(grabChip.viewPoint.x, grabChip.viewPoint.y, radius + 5, paintPlayerChipCircleSelect);
 			// draw inner text (number)
-			canvas.drawText(String.valueOf(grabChip.number), grabChip.viewPoint.x + radius, grabChip.viewPoint.y + radius, paintPlayerChipText);
+			canvas.drawText(String.valueOf(grabChip.number), grabChip.viewPoint.x - 10, grabChip.viewPoint.y + 10, paintPlayerChipText);
 		}
-
 		// non-grab chips
 		for (PlayerChip chip : playerChipList) {
 			//
@@ -141,9 +164,10 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 			}
 			// draw outer circle
 			int radius = (int) chip.length / 2;
-			canvas.drawCircle(chip.viewPoint.x, chip.viewPoint.y, radius, paintPlayerChipCircle);
+			Paint paint = (chip.paint == null) ? paintPlayerChipCircle : chip.paint;
+			canvas.drawCircle(chip.viewPoint.x, chip.viewPoint.y, radius, paint);
 			// draw inner text (number)
-			canvas.drawText(String.valueOf(chip.number), chip.viewPoint.x + radius, chip.viewPoint.y + radius, paintPlayerChipText);
+			canvas.drawText(String.valueOf(chip.number), chip.viewPoint.x - 10, chip.viewPoint.y + 10, paintPlayerChipText);
 		}
 	}
 
@@ -151,30 +175,39 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 	@Override
 	@SuppressLint("ClickableViewAccessibility")
 	public boolean onTouchEvent(MotionEvent event) {
-		
-		gestureDetector.onTouchEvent(event);
-		
+
 		int action = event.getAction();
-		//BDLog.i("onTouchEvent on view:" + event);
+		// BDLog.i("onTouchEvent on view:" + event);
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
+			touchMode = TouchEvent.DOWN;
 			handleTouchActionDown(event);
 			break;
 		case MotionEvent.ACTION_MOVE:
+			touchMode = TouchEvent.MOVE;
 			handleTouchActionMove(event);
 			break;
 		case MotionEvent.ACTION_UP:
+			touchMode = TouchEvent.UP;
 			handleTouchActionUp(event);
 			break;
 		}
 		return super.onTouchEvent(event);
 	}
 
+	private enum TouchEvent {
+		NONE, DOWN, MOVE, UP;
+	}
+
 	private enum ChipTouchMode {
 		NONE, GRAB,
 	}
 
+	private TouchEvent touchMode = TouchEvent.NONE;
 	private ChipTouchMode chipTouchMode = ChipTouchMode.NONE;
+	private float touchX, touchY;
+
+	// private float transX, transY;
 
 	private void handleTouchActionDown(MotionEvent event) {
 		// find if it exist
@@ -182,12 +215,15 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 		if (playerChipList == null) {
 			return;
 		}
-		chipTouchMode = ChipTouchMode.NONE;
-		float touchX = event.getX();
-		float touchY = event.getY();
+		if (ChipTouchMode.GRAB.equals(chipTouchMode)) {
+			return;
+		}
+		//
+		float curTouchX = event.getX();
+		float curTouchY = event.getY();
 		BDLog.d("handleTouchActionDown size:" + playerChipList.size());
 		for (PlayerChip chip : playerChipList) {
-			if (isGrabPointOnChip(chip, touchX, touchY)) {
+			if (isGrabPointOnChip(chip, curTouchX, curTouchY)) {
 				playerChipGrab = chip;
 				playerChipGrab.grab = true;
 				chipTouchMode = ChipTouchMode.GRAB;
@@ -195,42 +231,51 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 				break;
 			}
 		}
-		if(ChipTouchMode.NONE.equals(chipTouchMode)){
+		if (ChipTouchMode.NONE.equals(chipTouchMode)) {
 			playerChipGrab = null;
 		}
+		touchX = event.getX() - left;
+		touchY = event.getY() - top;
 	}
 
 	private boolean isGrabPointOnChip(PlayerChip chip, float touchX, float touchY) {
 		Rect rect = new Rect();
-		BDLog.d("isGrabPointOnChip touchX:" + touchX + ",touchY:" + touchY + "// viewX:" + chip.viewPoint.x + ",viewY:" + chip.viewPoint.y + ", num:" + chip.number);
-		rect.set((int) (chip.viewPoint.x - left), (int) (chip.viewPoint.y - top), (int) (chip.viewPoint.x + chip.length), (int) (chip.viewPoint.y + chip.length));
+		rect.set((int) (chip.viewPoint.x - 10), (int) (chip.viewPoint.y - 10), (int) (chip.viewPoint.x + chip.length + 10), (int) (chip.viewPoint.y + chip.length + 10));
+		BDLog.d("isGrabPointOnChip touchX:" + touchX + ",touchY:" + touchY + "// viewX:" + chip.viewPoint.x + ",viewY:" + chip.viewPoint.y + ", num:" + chip.number + ", R.width:"
+				+ rect.width() + ", R.height:" + rect.height());
 		return rect.contains((int) touchX, (int) touchY);
 	}
 
 	private void handleTouchActionMove(MotionEvent event) {
-		BDLog.d("handleTouchActionMove chipTouchMode:" + chipTouchMode);
-		if (ChipTouchMode.GRAB.equals(chipTouchMode)) {
-			playerChipGrab.viewPoint.x = event.getX() - left;
-			playerChipGrab.viewPoint.y = event.getY() - top;
-			BDLog.d("handleTouchActionMove chipTouchMode:" + chipTouchMode);
-			invalidate();
+		touchX = event.getX() - left;
+		touchY = event.getY() - top;
+		if (ChipTouchMode.GRAB.equals(chipTouchMode) && playerChipGrab.grab) {
+			playerChipGrab.viewPoint.x = touchX;
+			playerChipGrab.viewPoint.y = touchY;
+			// BDLog.d("handleTouchActionMove chipTouchMode:" + chipTouchMode +
+			// ", transX:" + transX + ", transY:" + transY);
 		}
+		invalidate();
 	}
 
 	private void handleTouchActionUp(MotionEvent event) {
-
 		BDLog.d("handleTouchActionUp playerChipGrab:" + playerChipGrab);
-
 		// set renew player chip
-		if (playerChipGrab != null) {
+		if (ChipTouchMode.GRAB.equals(chipTouchMode) && playerChipGrab != null) {
+			touchX = event.getX() - left;
+			touchY = event.getY() - top;
+			playerChipGrab.viewPoint.x = touchX;
+			playerChipGrab.viewPoint.y = touchY;
 			playerChipGrab.grab = false;
 			playerChipHelper.renewPlayerChip(playerChipGrab);
 		}
 		chipTouchMode = ChipTouchMode.NONE;
+		invalidate();
 	}
-	
+
 	private int left, top, right, bottom;
 	private int viewWidth, viewHeight;
+
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		boolean isFirst = (0 == left && 0 == top && 0 == right && 0 == bottom);
@@ -241,8 +286,9 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 		if (changed || isFirst) {
 			viewWidth = right - left;
 			viewHeight = bottom - top;
+			playerChipHelper.setViewBounds(viewWidth, viewHeight);
 		}
+		BDLog.e("onLayout left:" + left + ", top:" + top + ", right:" + right + ", bottom:" + bottom);
 		super.onLayout(changed, l, t, r, b);
 	}
-	
 }

@@ -21,12 +21,23 @@
             android:layout_height="match_parent"
             android:onClick="onClickRemovePlayer"
             android:text="-" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="onClickClearPlayer"
+            android:text="Clear" />
+
+        <Spinner
+            android:id="@+id/spinner_formation"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
     </LinearLayout>
-    
+
     <com.example.test_team_manager.view.PlayGroundView
         android:id="@+id/playGroundView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/lly_control_layer"/>
+        android:layout_below="@id/lly_control_layer" />
 
 </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.example.test_team_manager.model;
 
-import android.graphics.Rect;
+import android.graphics.Paint;
+
 
 public class PlayerChip {
 
@@ -10,6 +11,8 @@ public class PlayerChip {
 	public String name;
 	public float length;
 	public ViewPoint viewPoint;
+	public PlayerFormation formation;
+	public Paint paint;
 	public boolean grab = false;
 	
 	public static class ViewPoint{

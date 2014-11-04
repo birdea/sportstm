@@ -6,4 +6,5 @@ public interface PlayerChipInterface {
 	public void addPlayerChip(int id);
 	public void removePlayerChip();
 	public void removePlayerChip(int id);
+	public void clearPlayerChips();
 }
