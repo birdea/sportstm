@@ -219,9 +219,9 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 			return;
 		}
 		//
-		float curTouchX = event.getX();
-		float curTouchY = event.getY();
-		BDLog.d("handleTouchActionDown size:" + playerChipList.size());
+		float curTouchX = getTouchX(event);
+		float curTouchY = getTouchY(event);
+		//BDLog.d("handleTouchActionDown size:" + playerChipList.size());
 		for (PlayerChip chip : playerChipList) {
 			if (isGrabPointOnChip(chip, curTouchX, curTouchY)) {
 				playerChipGrab = chip;
@@ -234,8 +234,15 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 		if (ChipTouchMode.NONE.equals(chipTouchMode)) {
 			playerChipGrab = null;
 		}
-		touchX = event.getX() - left;
-		touchY = event.getY() - top;
+		touchX = getTouchX(event);
+		touchY = getTouchY(event);
+	}
+	
+	private float getTouchX(MotionEvent event){
+		return event.getX() - left;
+	}
+	private float getTouchY(MotionEvent event){
+		return event.getY() - top;
 	}
 
 	private boolean isGrabPointOnChip(PlayerChip chip, float touchX, float touchY) {
@@ -247,14 +254,13 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 	}
 
 	private void handleTouchActionMove(MotionEvent event) {
-		touchX = event.getX() - left;
-		touchY = event.getY() - top;
+		touchX = getTouchX(event);
+		touchY = getTouchY(event);
 		if (ChipTouchMode.GRAB.equals(chipTouchMode) && playerChipGrab.grab) {
 			playerChipGrab.viewPoint.x = touchX;
 			playerChipGrab.viewPoint.y = touchY;
-			// BDLog.d("handleTouchActionMove chipTouchMode:" + chipTouchMode +
-			// ", transX:" + transX + ", transY:" + transY);
 		}
+		BDLog.d("handleTouchActionMove chipTouchMode:" + chipTouchMode + ", touchX:" + touchX + ", touchY:" + touchY);
 		invalidate();
 	}
 
@@ -262,8 +268,8 @@ public class PlayGroundView extends RelativeLayout implements PlayerChipInterfac
 		BDLog.d("handleTouchActionUp playerChipGrab:" + playerChipGrab);
 		// set renew player chip
 		if (ChipTouchMode.GRAB.equals(chipTouchMode) && playerChipGrab != null) {
-			touchX = event.getX() - left;
-			touchY = event.getY() - top;
+			touchX = getTouchX(event);
+			touchY = getTouchY(event);
 			playerChipGrab.viewPoint.x = touchX;
 			playerChipGrab.viewPoint.y = touchY;
 			playerChipGrab.grab = false;

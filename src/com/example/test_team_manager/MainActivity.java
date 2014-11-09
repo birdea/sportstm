@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.example.test_team_manager.activity.PlayGroundActivity;
+import com.example.test_team_manager.activity.PlayTimeRecordActivity;
+import com.example.test_team_manager.activity.PlayerRegisterActivity;
 
 public class MainActivity extends Activity {
 
@@ -18,9 +20,13 @@ public class MainActivity extends Activity {
 	public void onClickReadContacts(View view) {
 
 	}
+	
+	public void onClickPlayerTimer(View view) {
+		startActivity(new Intent(this, PlayTimeRecordActivity.class));
+	}
 
 	public void onClickRegisterMember(View view) {
-
+		startActivity(new Intent(this, PlayerRegisterActivity.class));
 	}
 
 	public void onClickShowPlayground(View view) {

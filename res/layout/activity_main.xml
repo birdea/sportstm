@@ -14,12 +14,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:onClick="onClickReadContacts"
+                android:enabled="false"
                 android:text="Read Contacts" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:onClick="onClickRegisterMember"
+                android:enabled="true"
                 android:text="Register Member" />
         </TableRow>
 
@@ -29,7 +31,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:onClick="onClickShowPlayground"
+                android:enabled="true"
                 android:text="Show Playground" />
+            
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:onClick="onClickPlayerTimer"
+                android:enabled="true"
+                android:text="CountDownTimer" />
         </TableRow>
 
         <TableRow>
@@ -38,12 +48,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:onClick="onClickMakeSchedule"
+                android:enabled="false"
                 android:text="Make Schedule" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:onClick="onClickShareSchedule"
+                android:enabled="false"
                 android:text="Share Schedule" />
         </TableRow>
     </TableLayout>

@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.PlayGroundActivity" />
+        <activity android:name=".activity.PlayerRegisterActivity" />
+        <activity android:name=".activity.PlayTimeRecordActivity" />
     </application>
 
 </manifest>
