@@ -69,7 +69,7 @@ public class PlayerChipHelper {
 		int[] xy = new int[2];
 		xy[0] = 60;
 		xy[1] = 60 * lastNumber;
-		if (xy[1] > viewHeight) {
+		if (xy[1] > viewHeight && dividerY != 0) {
 			xy[0] = 60 * (lastNumber / dividerY + 1);
 			xy[1] = 60 * (lastNumber % dividerY - 1);
 		}
